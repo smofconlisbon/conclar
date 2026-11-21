@@ -4,6 +4,8 @@ import Navigation from "./Navigation";
 
 const headerImg = configData.HEADER.IMG_SRC ? <img src={configData.HEADER.IMG_SRC} alt={configData.HEADER.IMG_ALT_TEXT}></img> : "";
 const showBreak = configData.HEADER.LINEFEED_AFTER_URL ? <br /> : "";
+// sr-only rather than omitted: this is the page's only <h1>.
+const titleClass = configData.HEADER.HIDE_TITLE ? "sr-only" : undefined;
 
 // headingHidden keeps the title visible but drops it from the accessibility
 // tree (aria-hidden) for contexts where another element already provides the
@@ -14,7 +16,7 @@ const Header = ({ title = "Programme Guide", showNavigation = true, headingHidde
     <header>
       {headerImg}
       {showBreak}
-      <h1 aria-hidden={headingHidden || undefined}>{title}</h1>
+      <h1 className={titleClass} aria-hidden={headingHidden || undefined}>{title}</h1>
       { showNavigation ? <Navigation /> : <></> }
     </header>
   );

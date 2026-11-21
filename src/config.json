@@ -1,9 +1,8 @@
 {
-  "APP_ID": "O2021",
-  "APP_TITLE": "ConClár Programme Guide",
+  "APP_ID": "smofcon43",
+  "APP_TITLE": "SMOFcon 43 Programme Guide",
   "DATA_URLS": {
-    "SCHEDULE": "/2022/schedule.json",
-    "PEOPLE": "/2022/people.json"
+    "COMBINED": "https://participants.smofconlisbon.org/published/conclar-v2.json"
   },
   "FETCH_OPTIONS": {
     "cache": "reload",
@@ -18,39 +17,58 @@
       "Origin": "https://guide.smofconlisbon.org"
     }
   },
-  "TIMEZONE": "Europe/Dublin",
-  "TIMEZONECODE": "IST",
+  "TIMEZONE": "Europe/Lisbon",
+  "TIMEZONECODE": "WET",
   "INTERACTIVE": true,
   "HEADER": {
-    "IMG_SRC": "",
-    "IMG_ALT_TEXT": "",
-    "LINEFEED_AFTER_URL": false
+    "IMG_SRC": "/smofcon43-logo.png",
+    "IMG_ALT_TEXT": "SMOFcon 43",
+    "LINEFEED_AFTER_URL": false,
+    "HIDE_TITLE": true
   },
   "NAVIGATION": {
     "PROGRAM": "Programme",
     "PEOPLE": "People",
     "MYSCHEDULE": "My Schedule",
-    "INFO": "Information",
     "SETTINGS": "Settings",
-    "EXTRA": [{ "LABEL": "SMOFcon Home", "URL": "https://www.smofconlisbon.org", "ICON_NAME": "Home" }]
+    "EXTRA": [
+      { "LABEL": "Member portal", "URL": "https://members.smofconlisbon.org", "ICON_NAME": "Home" },
+      { "LABEL": "Website", "URL": "https://www.smofconlisbon.org", "ICON_NAME": "Globe" }
+    ]
   },
   "HELP_TEXT": {
-    "WELCOME": "This is a dummy schedule used for testing.",
-    "SHARING": "You may share your personal schedule to other devices using the QR codes on the My Schedule page.",
+    "WELCOME": "This is a draft schedule.",
+    "SHARING": "This is a draft schedule.",
     "CLOSE_ARIA_LABEL": "Dismiss help text"
   },
   "LOCATIONS": {
     "SEARCHABLE": false,
     "LABEL": "Show on map",
     "MAPPING": [
-      { "KEY": "Davin - Croke Park", "MAP_URL": "https://map.octocon.com" }
+      { "KEY": "Arts 2", "MAP_URL": "https://map.smofconlisbon.org/map/first-floor/room/arts-2" },
+      { "KEY": "Auditorium", "MAP_URL": "https://map.smofconlisbon.org/map/ground-floor/room/auditorium" },
+      { "KEY": "Diamante 1", "MAP_URL": "https://map.smofconlisbon.org/map/ground-floor/room/diamante-1" },
+      { "KEY": "Diamante 2", "MAP_URL": "https://map.smofconlisbon.org/map/ground-floor/room/diamante-2" },
+      { "KEY": "Diamante 3", "MAP_URL": "https://map.smofconlisbon.org/map/ground-floor/room/diamante-3" },
+      { "KEY": "Ruby", "MAP_URL": "https://map.smofconlisbon.org/map/ground-floor/room/ruby" }
     ]
   },
   "VENUES": {
     "ALL_LABEL": "All @venue",
     "UNGROUPED_LABEL": "Other",
     "MAPPING": [
-      { "NAME": "Convention Center", "LOCATIONS": ["Davin - Croke Park"] }
+      {
+        "NAME": "Ground",
+        "LOCATIONS": ["Auditorium", "Diamante 1", "Diamante 2", "Diamante 3", "Ruby"]
+      },
+      {
+        "NAME": "Floor 1",
+        "LOCATIONS": ["Arts 2"]
+      },
+      {
+        "NAME": "Online",
+        "LOCATIONS": ["Zoom 1"]
+      }
     ]
   },
   "APPLICATION": {
@@ -60,11 +78,11 @@
   },
   "PROGRAM": {
     "LIMIT": {
-      "SHOW": true,
+      "SHOW": false,
       "LABEL": "Maximum items displayed",
       "OPTIONS": [50, 100, 250, 500, 1000],
       "ALL_LABEL": "Show all",
-      "DEFAULT": 100,
+      "DEFAULT": 100000,
       "SHOW_MORE": {
         "LABEL": "Show more items",
         "NO_MORE": "No more items to display",
@@ -296,7 +314,7 @@
     "FETCH_BUTTON_LABEL": "Fetch Data Now"
   },
   "SYNC": {
-    "API_URL": "https://localhost:3001/api/conclar",
+    "API_URL": "https://members.smofconlisbon.org/api/conclar",
     "LOADING_LABEL": "Loading...",
     "LOGIN_LABEL": "Log in",
     "LOGOUT_LABEL": "Log out @display_name",

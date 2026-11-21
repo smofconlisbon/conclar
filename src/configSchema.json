@@ -117,6 +117,10 @@
         "LINEFEED_AFTER_URL": {
           "type": "boolean",
           "description": "If true, place a line feed after the image."
+        },
+        "HIDE_TITLE": {
+          "type": "boolean",
+          "description": "If true, hide the title (APP_TITLE) in the header, e.g. when the header image already shows the convention name. It remains available to screen readers."
         }
       }
     },

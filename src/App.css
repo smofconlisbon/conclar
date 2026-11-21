@@ -41,10 +41,10 @@
  */
 :root {
   /* ---- Tier 1: Inputs ---- */
-  --brand-tint: #619b40;
+  --brand-tint: #009689;
   --gray-tint: blue;
-  --info-tint: #2b7fff;
-  --danger-tint: #ff4c4c;
+  --info-tint: #0069a8;
+  --danger-tint: #c8503a;
 
   /* ---- Tier 2: Palette ---- */
   --gray-50: color-mix(in srgb, var(--gray-tint) var(--ramp-50-low-amt), var(--ramp-50-base));

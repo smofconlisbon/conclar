@@ -27,6 +27,7 @@ Copy `src/config_example.json` to `src/config.json` and customise. See the [Gett
 - `HEADER.IMG_SRC` (string) — Set to the image filename to display. May be a file in the public directory. Leave blank for no image.
 - `HEADER.IMG_ALT_TEXT` (string) — Set to the alt text that should display for the image.
 - `HEADER.LINEFEED_AFTER_URL` (boolean) — If true, place a line feed after the image.
+- `HEADER.HIDE_TITLE` (boolean) — If true, hide the title (APP_TITLE) in the header, e.g. when the header image already shows the convention name. It remains available to screen readers.
 - `NAVIGATION` (object, required) — Each value in this section sets the label that will appear on main navigation of the site. Useful for switching between different international spellings of "programme".
 - `NAVIGATION.PROGRAM` (string, required) — Label for program/programme menu.
 - `NAVIGATION.PEOPLE` (string, required) — Label for people menu.

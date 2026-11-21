@@ -24,7 +24,8 @@
   "HEADER": {
     "IMG_SRC": "",
     "IMG_ALT_TEXT": "",
-    "LINEFEED_AFTER_URL": false
+    "LINEFEED_AFTER_URL": false,
+    "HIDE_TITLE": false
   },
   "NAVIGATION": {
     "PROGRAM": "Programme",
