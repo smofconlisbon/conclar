@@ -36,11 +36,6 @@
       { "LABEL": "Website", "URL": "https://www.smofconlisbon.org", "ICON_NAME": "Globe" }
     ]
   },
-  "HELP_TEXT": {
-    "WELCOME": "This is a draft schedule.",
-    "SHARING": "This is a draft schedule.",
-    "CLOSE_ARIA_LABEL": "Dismiss help text"
-  },
   "LOCATIONS": {
     "PLACEHOLDER": "Room",
     "SEARCHABLE": false,
