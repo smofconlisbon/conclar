@@ -135,6 +135,7 @@ Copy `src/config_example.json` to `src/config.json` and customise. See the [Gett
 - `LINKS[].NAME` (string) — The name of the link as it appears in the links object in the program data.
 - `LINKS[].TEXT` (string) — The text that should appear on this link in ConClár.
 - `LINKS[].TAG` (string) — An optional tag to add to every program item which includes a matching link. If using prefixed tags, include the prefix, e.g. "type:Workshop".
+- `LINKS[].TAG_MISSING` (string) — An optional tag to add to every program item which does not include a matching link. If using prefixed tags, include the prefix, e.g. "type:In person".
 - `LINKS[].WHEN` (array of string) — An optional array listing times when the link will be visible. Multiple values may be given, e.g. ["before", "during"], meaning the link is visible prior to the item and while it is happening, but disappears when it finishes. If omitted, the link is always visible.
 - `CONVENTION_TIME` (object)
 - `CONVENTION_TIME.NOTICE` (string) — Notice explaining that displayed times are convention time. @timezone is replaced with the convention timezone.

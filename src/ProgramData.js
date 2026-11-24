@@ -188,22 +188,19 @@ export class ProgramData {
   }
 
   /**
-   * TAG should include an appropriate prefix if using them.
+   * TAG and TAG_MISSING should include an appropriate prefix if using them.
    *
    * @param {array} program
    * @returns {array}
    */
   static tagLinks(program) {
-    const linksToTag = configData.LINKS.filter((link) => link.TAG.length > 0);
-    for (const linkToTag of linksToTag) {
+    for (const link of configData.LINKS) {
       for (const item of program) {
-        if (
-          item.hasOwnProperty("links") &&
-          // handle null links property
-          item.links &&
-          item.links.hasOwnProperty(linkToTag.NAME)
-        ) {
-          item.tags.push(linkToTag.TAG);
+        // handle null links property
+        const hasLink = !!item.links && item.links.hasOwnProperty(link.NAME);
+        const tag = hasLink ? link.TAG : link.TAG_MISSING;
+        if (tag?.length > 0) {
+          item.tags.push(tag);
         }
       }
     }
@@ -378,11 +375,12 @@ export class ProgramData {
   static processData(progData, pplData) {
     let program = this.processProgramData(progData);
     if (configData.TAGS?.FORMAT_AS_TAG) program = this.reformatAsTag(program);
-    if (
-      configData.LINKS &&
-      configData.LINKS.filter((link) => link.TAG.length > 0).length > 0
-    )
+    const tagsLinks = configData.LINKS?.some(
+      (link) => link.TAG?.length > 0 || link.TAG_MISSING?.length > 0,
+    );
+    if (tagsLinks) {
       program = this.tagLinks(program);
+    }
     const people = this.processPeopleData(pplData);
     this.addProgramParticipantDetails(program, people);
     const locations = this.processLocations(program);

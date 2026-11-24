@@ -488,6 +488,7 @@
           "NAME": { "type": "string", "description": "The name of the link as it appears in the links object in the program data." },
           "TEXT": { "type": "string", "description": "The text that should appear on this link in ConClár." },
           "TAG": { "type": "string", "description": "An optional tag to add to every program item which includes a matching link. If using prefixed tags, include the prefix, e.g. \"type:Workshop\"." },
+          "TAG_MISSING": { "type": "string", "description": "An optional tag to add to every program item which does not include a matching link. If using prefixed tags, include the prefix, e.g. \"type:In person\"." },
           "WHEN": {
             "type": "array",
             "description": "An optional array listing times when the link will be visible. Multiple values may be given, e.g. [\"before\", \"during\"], meaning the link is visible prior to the item and while it is happening, but disappears when it finishes. If omitted, the link is always visible.",
