@@ -50,12 +50,13 @@ Copy `src/config_example.json` to `src/config.json` and customise. See the [Gett
 - `LOCATIONS.MAPPING` (array of object) — Array of locations, with links to show on map.
 - `LOCATIONS.MAPPING[].KEY` (string) — Room name, matching the location name used in the programme data.
 - `LOCATIONS.MAPPING[].MAP_URL` (string) — Link to a map for this location.
-- `VENUES` (object) — Groups locations by venue, for conventions spanning more than one building. If omitted, the locations drop-down is a flat, ungrouped list.
-- `VENUES.ALL_LABEL` (string) — Label template for the "select this whole venue" option shown at the top of each venue's group in the locations drop-down. @venue is replaced with the venue name. Defaults to "All @venue".
-- `VENUES.UNGROUPED_LABEL` (string) — Label for the group heading shown above locations that aren't listed under any venue. Defaults to "Other".
-- `VENUES.MAPPING` (array of object) — Array of venues. Venues are listed in the locations drop-down in the order given here. A location may only belong to one venue; locations not listed under any venue are shown grouped under UNGROUPED_LABEL, below the venue groups. Selecting a venue's "All <venue>" option shows every programme item in any of that venue's locations. Venue names must be unique and a location may not be assigned to more than one venue - enforced at validation time, not by this schema.
-- `VENUES.MAPPING[].NAME` (string) — Venue name, shown in the locations drop-down.
-- `VENUES.MAPPING[].LOCATIONS` (array of string) — Location names (matching LOCATIONS.MAPPING keys / programme data location names) that belong to this venue.
+- `VENUES` (object) — Groups locations into venues (headings in the locations drop-down), and defines named sets of locations that can be selected in one go, e.g. "All In-person". If omitted, the locations drop-down is a flat, ungrouped list.
+- `VENUES.ALL_LABEL` (string) — Label template for every option that selects a set of locations: a venue's own option, a set object, or a reference to a venue or set. @venue is replaced with the venue or set name. Defaults to "All @venue".
+- `VENUES.UNGROUPED_LABEL` (string) — Label for the group heading shown above locations that aren't listed directly under any venue. Defaults to "Other".
+- `VENUES.MAPPING` (array of object) — Array of venues, each shown as a heading in the locations drop-down, in the order given here. Locations not listed directly under any venue are shown under UNGROUPED_LABEL, below the venues. Options that select a set, and headings, are hidden when none of their locations appear in the loaded programme. Venue and set names share one namespace and must be unique; a name may not match a LOCATIONS.MAPPING key; a location may be listed directly under at most one venue; and references may not form a cycle - enforced at validation time, not by this schema.
+- `VENUES.MAPPING[].NAME` (string) — Venue name, shown as a heading in the locations drop-down, and shown after the location name on programme items for locations listed directly under this venue.
+- `VENUES.MAPPING[].SHOW_ALL` (boolean) — Whether to show an "All <venue>" option at the top of this venue's group, selecting everything listed under it (including the locations covered by its sets and references). Defaults to true.
+- `VENUES.MAPPING[].LOCATIONS` (array of any) — Entries shown under this venue's heading, in order. A string matching the NAME of a venue or set is a reference, shown as an option selecting all of that venue's or set's locations. Any other string is a location name (matching LOCATIONS.MAPPING keys / programme data location names). An object defines a named set, shown as an option selecting all of its locations.
 - `APPLICATION` (object, required) — General application-wide settings.
 - `APPLICATION.LOADING` (object, required)
 - `APPLICATION.LOADING.MESSAGE` (string, required) — Message to display while loading.

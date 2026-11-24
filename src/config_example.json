@@ -52,7 +52,16 @@
     "ALL_LABEL": "All @venue",
     "UNGROUPED_LABEL": "Other",
     "MAPPING": [
-      { "NAME": "Convention Center", "LOCATIONS": ["Davin - Croke Park"] }
+      {
+        "NAME": "Everywhere",
+        "SHOW_ALL": false,
+        "LOCATIONS": [
+          { "NAME": "In-person", "LOCATIONS": ["Convention Center"] },
+          "Online"
+        ]
+      },
+      { "NAME": "Convention Center", "LOCATIONS": ["Davin - Croke Park"] },
+      { "NAME": "Online", "SHOW_ALL": false, "LOCATIONS": ["Online 1"] }
     ]
   },
   "APPLICATION": {

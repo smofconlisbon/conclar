@@ -15,17 +15,17 @@ export function hasVenues(configData) {
 }
 
 /**
- * The react-select option value used for a venue's "All <venue>" pseudo-option.
+ * The react-select option value for an option selecting a venue or set.
  *
- * @param {string} venueName
+ * @param {string} name Venue or set name.
  * @returns {string}
  */
-export function venueOptionValue(venueName) {
-  return VENUE_VALUE_PREFIX + venueName;
+export function venueOptionValue(name) {
+  return VENUE_VALUE_PREFIX + name;
 }
 
 /**
- * Whether a react-select option value refers to a venue (rather than a location).
+ * Whether a react-select option value refers to a venue or set (rather than a location).
  *
  * @param {string} value
  * @returns {boolean}
@@ -35,7 +35,7 @@ export function isVenueValue(value) {
 }
 
 /**
- * Extract the venue name from a venue option value.
+ * Extract the venue or set name from a venue option value.
  *
  * @param {string} value
  * @returns {string}
@@ -45,71 +45,191 @@ export function venueNameFromValue(value) {
 }
 
 /**
- * Build the "All <venue>" label for a venue, using the configured template.
+ * Build the "All <venue>" label for a venue or set, using the configured template.
  *
  * @param {object} configData Parsed config.json.
- * @param {string} venueName
+ * @param {string} name Venue or set name.
  * @returns {string}
  */
-export function allVenueLabel(configData, venueName) {
+export function allVenueLabel(configData, name) {
   const template = (configData.VENUES && configData.VENUES.ALL_LABEL) || "All @venue";
-  return template.replace("@venue", venueName);
+  return template.replace("@venue", name);
+}
+
+const modelCache = new WeakMap();
+
+/**
+ * Interpret VENUES.MAPPING. Venues (headings) and set objects share one
+ * namespace; a string matching a name is a reference, any other string is a
+ * location. Cached per configData object, since the filter calls into this
+ * for every programme item.
+ *
+ * @param {object} configData Parsed config.json.
+ * @returns {{
+ *   headings: Array<{name: string, showAll: boolean, entries: Array<{kind: "set"|"location", name: string}>}>,
+ *   selectable: Set<string>,
+ *   owner: Map<string, string>,
+ *   locationsOf: (name: string) => Set<string>,
+ * }}
+ */
+function venueModel(configData) {
+  let model = modelCache.get(configData);
+  if (model) {
+    return model;
+  }
+
+  const mapping = hasVenues(configData) ? configData.VENUES.MAPPING : [];
+  const definitions = new Map();
+  for (const venue of mapping) {
+    definitions.set(venue.NAME, venue.LOCATIONS);
+    for (const entry of venue.LOCATIONS) {
+      if (typeof entry === "object") {
+        definitions.set(entry.NAME, entry.LOCATIONS);
+      }
+    }
+  }
+
+  const selectable = new Set();
+  const owner = new Map();
+  const headings = mapping.map((venue) => {
+    const showAll = venue.SHOW_ALL !== false;
+    if (showAll) {
+      selectable.add(venue.NAME);
+    }
+    const entries = venue.LOCATIONS.map((entry) => {
+      const name = typeof entry === "object" ? entry.NAME : entry;
+      if (typeof entry === "object" || definitions.has(name)) {
+        selectable.add(name);
+        return { kind: "set", name };
+      }
+      if (!owner.has(name)) {
+        owner.set(name, venue.NAME);
+      }
+      return { kind: "location", name };
+    });
+    return { name: venue.NAME, showAll, entries };
+  });
+
+  const resolved = new Map();
+  function locationsOf(name, visiting = new Set()) {
+    if (resolved.has(name)) {
+      return resolved.get(name);
+    }
+    const result = new Set();
+    // Validation rejects cycles; this guard only stops a bad config hanging the page.
+    if (visiting.has(name) || !definitions.has(name)) {
+      return result;
+    }
+    visiting.add(name);
+    for (const entry of definitions.get(name)) {
+      const entryName = typeof entry === "object" ? entry.NAME : entry;
+      if (definitions.has(entryName)) {
+        for (const loc of locationsOf(entryName, visiting)) {
+          result.add(loc);
+        }
+      } else {
+        result.add(entryName);
+      }
+    }
+    visiting.delete(name);
+    resolved.set(name, result);
+    return result;
+  }
+
+  model = { headings, selectable, owner, locationsOf };
+  modelCache.set(configData, model);
+  return model;
 }
 
 /**
- * Find the venue a location belongs to, if any.
+ * Find the venue a location is listed directly under, if any. Locations only
+ * reached through sets or references have no venue.
  *
  * @param {string} loc Location name.
  * @param {object} configData Parsed config.json.
- * @returns {?string} The venue name, or null if the location isn't mapped to a venue.
+ * @returns {?string} The venue name, or null.
  */
 export function venueForLocation(loc, configData) {
-  if (!hasVenues(configData)) return null;
-  const venue = configData.VENUES.MAPPING.find((v) => v.LOCATIONS.includes(loc));
-  return venue ? venue.NAME : null;
+  return venueModel(configData).owner.get(loc) ?? null;
 }
 
 /**
- * Build react-select options for the locations dropdown, grouped by venue.
- * Each venue group is headed by an "All <venue>" pseudo-option, followed by
- * that venue's locations. Locations not belonging to any venue are appended
- * as a trailing, unheaded group. If no venues are configured, returns the
- * locations unchanged (a single flat list).
+ * Build react-select options for the locations dropdown, grouped by venue in
+ * VENUES.MAPPING order. Each venue group may start with an "All <venue>"
+ * option, followed by its entries in config order: set objects and references
+ * become options selecting a set, other strings become location options.
+ * Options matching nothing in the loaded program, and groups left empty, are
+ * omitted. Locations not listed directly under any venue are appended as a
+ * trailing group. If no venues are configured, returns the locations
+ * unchanged (a single flat list).
  *
  * @param {Array<{value: string, label: string}>} locations Locations present in the loaded program.
  * @param {object} configData Parsed config.json.
  * @returns {Array} react-select options, possibly grouped.
  */
 export function buildLocationOptions(locations, configData) {
-  if (!hasVenues(configData)) return locations;
+  if (!hasVenues(configData)) {
+    return locations;
+  }
 
-  const usedLocations = new Set();
-  const groups = configData.VENUES.MAPPING.map((venue) => {
-    const venueLocations = locations
-      .filter((loc) => venue.LOCATIONS.includes(loc.value))
-      .sort((a, b) => a.value.localeCompare(b.value));
-    venueLocations.forEach((loc) => usedLocations.add(loc.value));
-    return {
-      label: venue.NAME,
-      options: [
-        { value: venueOptionValue(venue.NAME), label: allVenueLabel(configData, venue.NAME) },
-        ...venueLocations,
-      ],
-    };
-  });
+  const model = venueModel(configData);
+  const present = new Map(locations.map((loc) => [loc.value, loc]));
+  const setOption = (name) => {
+    for (const loc of model.locationsOf(name)) {
+      if (present.has(loc)) {
+        return { value: venueOptionValue(name), label: allVenueLabel(configData, name) };
+      }
+    }
+    return null;
+  };
 
-  const ungrouped = locations.filter((loc) => !usedLocations.has(loc.value));
+  const groups = [];
+  for (const heading of model.headings) {
+    const options = [];
+    if (heading.showAll) {
+      const all = setOption(heading.name);
+      if (all) {
+        options.push(all);
+      }
+    }
+    for (const entry of heading.entries) {
+      const option = entry.kind === "set" ? setOption(entry.name) : present.get(entry.name);
+      if (option) {
+        options.push(option);
+      }
+    }
+    if (options.length) {
+      groups.push({ label: heading.name, options });
+    }
+  }
+
+  const ungrouped = locations.filter((loc) => !model.owner.has(loc.value));
   if (ungrouped.length) {
-    const label =
-      (configData.VENUES && configData.VENUES.UNGROUPED_LABEL) || "Other";
+    const label = configData.VENUES.UNGROUPED_LABEL || "Other";
     groups.push({ label, options: ungrouped });
   }
   return groups;
 }
 
 /**
+ * Whether a locations-dropdown value can be selected. Location values always
+ * can; a venue or set value only if the config shows it as an option somewhere.
+ * Decided from config alone, so a /loc/ URL isn't pruned before the program loads.
+ *
+ * @param {string} value
+ * @param {object} configData Parsed config.json.
+ * @returns {boolean}
+ */
+export function isSelectableLocationValue(value, configData) {
+  if (!isVenueValue(value)) {
+    return true;
+  }
+  return venueModel(configData).selectable.has(venueNameFromValue(value));
+}
+
+/**
  * Whether a program item's location matches a selected locations-dropdown value,
- * expanding venue values ("venue:Marriott") to all locations in that venue.
+ * expanding venue and set values ("venue:In-person") to all the locations they cover.
  *
  * @param {string} itemLoc A single location from a program item's loc array.
  * @param {string} selectedValue A value from the selected-locations dropdown state.
@@ -118,11 +238,10 @@ export function buildLocationOptions(locations, configData) {
  */
 export function locationMatchesSelection(itemLoc, selectedValue, configData) {
   if (isVenueValue(selectedValue)) {
-    const venueName = venueNameFromValue(selectedValue);
-    const venue = hasVenues(configData)
-      ? configData.VENUES.MAPPING.find((v) => v.NAME === venueName)
-      : undefined;
-    return venue ? venue.LOCATIONS.includes(itemLoc) : false;
+    if (!isSelectableLocationValue(selectedValue, configData)) {
+      return false;
+    }
+    return venueModel(configData).locationsOf(venueNameFromValue(selectedValue)).has(itemLoc);
   }
   return selectedValue === itemLoc;
 }

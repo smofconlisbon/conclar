@@ -121,9 +121,13 @@ function validateDataSourceConfig(configData, errors) {
 }
 
 /**
- * Validate the optional VENUES config block. Each venue must have a non-empty
- * NAME and a non-empty LOCATIONS array of strings. Venue names must be unique,
- * and a location may not be assigned to more than one venue.
+ * Validate the optional VENUES config block. Venues and the set objects
+ * inside them share one namespace: names must be non-empty, unique, and not
+ * match a LOCATIONS.MAPPING key (a matching string would be read as a
+ * reference, not a location). Each LOCATIONS array must be non-empty. A
+ * location may be listed directly under at most one venue, since that venue
+ * is shown after the location on programme items. References must not form
+ * a cycle.
  *
  * @param {object} configData Parsed contents of config.json.
  * @param {string[]} errors Accumulator for problem descriptions.
@@ -136,38 +140,91 @@ function validateVenuesConfig(configData, errors) {
     return;
   }
 
-  const seenNames = new Set();
-  const locationOwner = new Map();
+  const mapKeys = new Set(
+    (configData.LOCATIONS?.MAPPING ?? []).map((location) => location.KEY)
+  );
+  // name -> { path, entries }
+  const definitions = new Map();
+
+  const define = (path, def) => {
+    if (typeof def.NAME !== "string" || def.NAME.length === 0) {
+      errors.push(`${path} must have a non-empty NAME.`);
+      return;
+    }
+    if (definitions.has(def.NAME)) {
+      errors.push(
+        `VENUES.MAPPING contains duplicate NAME "${def.NAME}" (${definitions.get(def.NAME).path} and ${path}).`
+      );
+      return;
+    }
+    if (mapKeys.has(def.NAME)) {
+      errors.push(
+        `${path}.NAME "${def.NAME}" matches a location in LOCATIONS.MAPPING; venue and set names must differ from location names.`
+      );
+    }
+    if (!Array.isArray(def.LOCATIONS) || def.LOCATIONS.length === 0) {
+      errors.push(`${path} must have a non-empty LOCATIONS array.`);
+      definitions.set(def.NAME, { path, entries: [] });
+      return;
+    }
+    definitions.set(def.NAME, { path, entries: def.LOCATIONS });
+  };
 
   for (const [index, venue] of configData.VENUES.MAPPING.entries()) {
-    if (typeof venue.NAME !== "string" || venue.NAME.length === 0) {
-      errors.push(`VENUES.MAPPING[${index}] must have a non-empty NAME.`);
-    } else if (seenNames.has(venue.NAME)) {
-      errors.push(`VENUES.MAPPING contains duplicate NAME "${venue.NAME}".`);
-    } else {
-      seenNames.add(venue.NAME);
-    }
-
-    if (
-      !Array.isArray(venue.LOCATIONS) ||
-      venue.LOCATIONS.length === 0 ||
-      !venue.LOCATIONS.every((loc) => typeof loc === "string" && loc.length > 0)
-    ) {
-      errors.push(
-        `VENUES.MAPPING[${index}] must have a non-empty LOCATIONS array of strings.`
-      );
-      continue;
-    }
-
-    for (const loc of venue.LOCATIONS) {
-      const owner = locationOwner.get(loc);
-      if (owner !== undefined && owner !== venue.NAME) {
-        errors.push(
-          `Location "${loc}" is assigned to both "${owner}" and "${venue.NAME}" in VENUES.MAPPING.`
-        );
-      } else {
-        locationOwner.set(loc, venue.NAME);
+    const path = `VENUES.MAPPING[${index}]`;
+    define(path, venue);
+    for (const [entryIndex, entry] of (venue.LOCATIONS ?? []).entries()) {
+      if (typeof entry === "object" && entry !== null) {
+        define(`${path}.LOCATIONS[${entryIndex}]`, entry);
       }
     }
+  }
+
+  const locationOwner = new Map();
+  for (const venue of configData.VENUES.MAPPING) {
+    for (const entry of venue.LOCATIONS ?? []) {
+      if (typeof entry !== "string" || definitions.has(entry)) continue;
+      const owner = locationOwner.get(entry);
+      if (owner !== undefined && owner !== venue.NAME) {
+        errors.push(
+          `Location "${entry}" is listed directly under both "${owner}" and "${venue.NAME}" in VENUES.MAPPING.`
+        );
+      } else {
+        locationOwner.set(entry, venue.NAME);
+      }
+    }
+  }
+
+  const referencesOf = (name) =>
+    definitions
+      .get(name)
+      .entries.map((entry) => (typeof entry === "object" && entry !== null ? entry.NAME : entry))
+      .filter((entryName) => definitions.has(entryName));
+
+  const done = new Set();
+  const reported = new Set();
+  const visit = (name, stack) => {
+    if (done.has(name)) return;
+    const cycleStart = stack.indexOf(name);
+    if (cycleStart !== -1) {
+      const cycle = stack.slice(cycleStart);
+      const key = [...cycle].sort().join("\u0000");
+      if (!reported.has(key)) {
+        reported.add(key);
+        errors.push(
+          `VENUES.MAPPING references form a cycle: ${[...cycle, name].map((n) => `"${n}"`).join(" -> ")}.`
+        );
+      }
+      return;
+    }
+    stack.push(name);
+    for (const ref of referencesOf(name)) {
+      visit(ref, stack);
+    }
+    stack.pop();
+    done.add(name);
+  };
+  for (const name of definitions.keys()) {
+    visit(name, []);
   }
 }
