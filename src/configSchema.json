@@ -172,6 +172,7 @@
       "additionalProperties": false,
       "description": "Configures the location filter and optional links to maps for each location.",
       "properties": {
+        "PLACEHOLDER": { "type": "string", "description": "The placeholder for the locations drop-down. Defaults to \"Select locations\"." },
         "SEARCHABLE": { "type": "boolean", "description": "Whether the location list can be searched by typing. (Searching can be inconvenient on touch screens.)" },
         "LABEL": { "type": "string", "description": "Label to show on map links." },
         "MAPPING": {

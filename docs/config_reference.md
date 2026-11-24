@@ -44,6 +44,7 @@ Copy `src/config_example.json` to `src/config.json` and customise. See the [Gett
 - `HELP_TEXT.SHARING` (string) — Text to display when user has selected items, informing them of sharing options.
 - `HELP_TEXT.CLOSE_ARIA_LABEL` (string) — Label to describe dismiss button.
 - `LOCATIONS` (object) — Configures the location filter and optional links to maps for each location.
+- `LOCATIONS.PLACEHOLDER` (string) — The placeholder for the locations drop-down. Defaults to "Select locations".
 - `LOCATIONS.SEARCHABLE` (boolean) — Whether the location list can be searched by typing. (Searching can be inconvenient on touch screens.)
 - `LOCATIONS.LABEL` (string) — Label to show on map links.
 - `LOCATIONS.MAPPING` (array of object) — Array of locations, with links to show on map.

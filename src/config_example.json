@@ -41,6 +41,7 @@
     "CLOSE_ARIA_LABEL": "Dismiss help text"
   },
   "LOCATIONS": {
+    "PLACEHOLDER": "Select locations",
     "SEARCHABLE": false,
     "LABEL": "Show on map",
     "MAPPING": [

@@ -290,7 +290,7 @@ const FilterableProgram = () => {
         <div className="search-filters">
           <div className="filter-locations">
             <ReactSelect
-              placeholder="Select locations"
+              placeholder={configData.LOCATIONS?.PLACEHOLDER ?? "Select locations"}
               options={buildLocationOptions(locations, configData)}
               isMulti
               isSearchable={configData.LOCATIONS?.SEARCHABLE}
