@@ -134,7 +134,8 @@
       { "PREFIX": "Tag", "PLACEHOLDER": "Tag", "SEARCHABLE": false, "HIDE": false },
       { "PREFIX": "Streaming", "PLACEHOLDER": "Streaming", "SEARCHABLE": false, "HIDE": false },
       { "PREFIX": "Replay", "PLACEHOLDER": "Replay", "SEARCHABLE": false, "HIDE": false },
-      { "PREFIX": "Sign-up", "PLACEHOLDER": "Sign-up", "SEARCHABLE": false, "HIDE": false }
+      { "PREFIX": "Sign-up", "PLACEHOLDER": "Sign-up", "SEARCHABLE": false, "HIDE": false },
+      { "PREFIX": "Track", "PLACEHOLDER": "Track", "SEARCHABLE": false, "HIDE": true }
     ],
     "WEIGHTS": [
       { "VALUE": "session_requires_signup", "WEIGHT": -1 }
@@ -153,7 +154,7 @@
       "SEARCHABLE": false,
       "HIDE": false
     },
-    "DONTLIST": ["Division", "days"]
+    "DONTLIST": ["Division", "Track", "days"]
   },
   "HIDE_BEFORE": {
     "HIDE": false,
