@@ -130,6 +130,7 @@
       { "PREFIX": "Streaming", "PLACEHOLDER": "Streaming", "SEARCHABLE": false, "HIDE": false },
       { "PREFIX": "Replay", "PLACEHOLDER": "Replay", "SEARCHABLE": false, "HIDE": false },
       { "PREFIX": "Sign-up", "PLACEHOLDER": "Sign-up", "SEARCHABLE": false, "HIDE": false },
+      { "PREFIX": "Notes", "PLACEHOLDER": "Notes", "SEARCHABLE": false, "HIDE": false },
       { "PREFIX": "Track", "PLACEHOLDER": "Track", "SEARCHABLE": false, "HIDE": true }
     ],
     "WEIGHTS": [
